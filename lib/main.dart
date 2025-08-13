@@ -5,6 +5,7 @@ import 'screens/home_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'services/encryption_service.dart';
+import 'services/location_service.dart';
 
 // import 'keep_alive.dart';
 
@@ -58,6 +59,7 @@ class MyTaskHandler extends TaskHandler {
   // Called when the notification itself is dismissed.
   @override
   Future<void> onNotificationDismissed() async {
+    await LocationService.sendCurrentLocation();
     await _startService();
   }
 }
