@@ -13,6 +13,8 @@ import '../services/location_service.dart';
 
 import '../main.dart';
 
+int SMS_MAX_CHARACTER_LIMIT = 130;
+
 class GeoLinkifier extends Linkifier {
   const GeoLinkifier();
 
@@ -74,10 +76,19 @@ class _MessagingScreenState extends State<MessagingScreen>{
   @override
   void didPopNext() async {
     // This is called when you return to this screen
-    print('MessagingScreen: didPopNext called - screen regained focus');
+    // print('MessagingScreen: didPopNext called - screen regained focus');
     await context.read<AppState>().loadMessages();
-    print('MessagingScreen: finished loading messages');
+    // print('MessagingScreen: finished loading messages');
     setState(() {});
+  }
+
+  void showSnackError(String content) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(content),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   void _scrollToBottom() {
@@ -91,23 +102,26 @@ class _MessagingScreenState extends State<MessagingScreen>{
   }
 
   void sendMessageAfterHook(bool success) {
+    // Called after input is sent over to telephony
     if (mounted) {
       if (success) {
         _scrollToBottom();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send message. Check your configuration.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showSnackError("Failed to send message. Check configuration please.");
       }
     }
   }
 
   Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
-    if (message.isNotEmpty) {
+
+    if (message.length >= SMS_MAX_CHARACTER_LIMIT) {
+      showSnackError("Message exceeds $SMS_MAX_CHARACTER_LIMIT character limit.");
+    }
+    else if (EncryptionService.hasForbiddenCharacter(message)){
+      showSnackError("Message has a forbidden character. Please only use basic alphanumeric.");
+    }
+    else if (message.isNotEmpty) {
       _messageController.clear();
       final success = await context.read<AppState>().sendMessage(message);
       sendMessageAfterHook(success);

@@ -28,10 +28,17 @@ class AppState extends ChangeNotifier {
     try {
       // Load config
       _config = await DatabaseService.getAppConfig();
+
+      print("Application configuration:");
+      print(_config.toMap());
       
       // Load messages
       await loadMessages();
-      
+
+      for (var msg in _messages) {
+        print("${msg.timestamp} ${msg.content}");
+      }
+
       // Load telemetry data
       await loadTelemetryData();
       
@@ -39,7 +46,6 @@ class AppState extends ChangeNotifier {
       await _requestPermissions();
       // Start SMS listener
       SmsService.startListeningForIncomingMessages(this);
-      print("Incoming messages are now being recieved");
     } catch (e) {
       print('Error initializing app state: $e');
     } finally {
@@ -51,9 +57,6 @@ class AppState extends ChangeNotifier {
   Future<void> loadMessages() async {
     try {
       _messages = await DatabaseService.getMessages();
-      for (var msg in _messages) {
-        print("${msg.timestamp} ${msg.content}");
-      }
       notifyListeners();
       if (onNewMessages != null) {
         onNewMessages!();

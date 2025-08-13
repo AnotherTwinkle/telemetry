@@ -5,6 +5,14 @@ class EncryptionService {
   static const String _printable =
       ' !"#\%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
+  static bool hasForbiddenCharacter(String s) {
+    for (var c in s.runes) {
+      int idx = _printable.indexOf(String.fromCharCode(c));
+      if (idx == -1) return true;
+    }
+    return false;
+  }
+
   static List<String> _shuffledAlphabet(String passkey) {
     final chars = _printable.split('');
     int hash = passkey.codeUnits.fold(0, (a, b) => a * 31 + b);

@@ -119,9 +119,7 @@ class DatabaseService {
     if (maps.isEmpty) {
       return AppConfig();
     }
-
-    print("LAAALALALALJDSAJFKKSJFO:SIJFOIDSFJDSIOFJNEIUDFhneiuem");
-    print(maps.first);
+    
     return AppConfig.fromMap(maps.first);
   }
   

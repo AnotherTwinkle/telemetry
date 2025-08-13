@@ -33,25 +33,26 @@ class MyTaskHandler extends TaskHandler {
   // Called when the task is destroyed.
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
-    print("Ok!");
+    print("onDestroy called inside MyTaskHandler");
+    return;
   }
 
   // Called when data is sent using `FlutterForegroundTask.sendDataToTask`.
   @override
   void onReceiveData(Object data) {
-    print('onReceiveData: $data');
+    return;
   }
 
   // Called when the notification button is pressed.
   @override
   void onNotificationButtonPressed(String id) {
-    print('onNotificationButtonPressed: $id');
+    return;
   }
 
   // Called when the notification itself is pressed.
   @override
   void onNotificationPressed() {
-    print('onNotificationPressed');
+    return;
   }
 
   // Called when the notification itself is dismissed.
@@ -91,8 +92,6 @@ Future<void> _requestPermissions() async {
   }
 
 void _initService() {
-  print(EncryptionService.decrypt('K) ai', 'bubabu00'));
-  print("Task init called");
   FlutterForegroundTask.init(
     androidNotificationOptions: AndroidNotificationOptions(
       channelId: 'foreground_service',
@@ -115,7 +114,6 @@ void _initService() {
       allowWifiLock: true,
     ),
   );
- print("init called finished");
 }
 
 Future<ServiceRequestResult> _startService() async {
@@ -153,6 +151,8 @@ void _onReceiveTaskData(Object data) {
 
 void main() {
   // FlutterForegroundTask.initCommunicationPort();
+  debugPrintRebuildDirtyWidgets = false;
+  debugPrint = (String? message, {int? wrapWidth}) {};
   runApp(const TelemetryApp());
 }
 

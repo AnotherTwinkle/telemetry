@@ -41,14 +41,24 @@ class SmsService {
   }
 
   static Future<bool> sendEncryptedMessage(String content, bool isDataMessage) async {
+    print("<Inside function call sendEncryptedMessage>");
+    print("content : $content | isDataMessage : $isDataMessage");
+
     final config = await DatabaseService.getAppConfig();
     if (config.pairedNumber == null || config.passkey == null) {
+      print("<return> : false in config check");
+      print("-> pairedNumber : ${config.pairedNumber}");
+      print("-> passkey : ${config.passkey}");
       return false;
     }
+
     final encryptedContent = EncryptionService.encrypt(content, config.passkey!);
     final messageWithHeader = EncryptionService.addHeader(encryptedContent, isDataMessage);
+
+    print("encryptedContent : $encryptedContent");
+    print("messageWithHeader : $messageWithHeader");
+
     final success = await sendSms(config.pairedNumber!, messageWithHeader);
-    print("Sent message $content should be encrypted as $messageWithHeader");
     if (success) {
       final message = Message(
         sender: 'Me',
@@ -77,24 +87,27 @@ class SmsService {
     // Will handle sms insertion into DB. Will not handle UI updates, those must be dispatched by 
     // respective handlers.
 
+    print("<Inside function call _handleMessage>");
     final config = await DatabaseService.getAppConfig();
     final sender = sms.address ?? '';
     final content = sms.body ?? '';
-
 
     if (config.pairedNumber == null || sender != config.pairedNumber) {
       return;
     }
 
-    print("handler : $content");
+    final hasHeader = EncryptionService.hasAppHeader(content);
+    print("Header found? ${hasHeader}");
 
-    if (EncryptionService.hasAppHeader(content)) {
+    if (hasHeader) {
       final contentWithoutHeader = EncryptionService.removeHeader(content);
-      print("contentWithoutHeader : $contentWithoutHeader");
       final decryptedContent = EncryptionService.decrypt(contentWithoutHeader, config.passkey ?? '');
-      print("decryptedContent : $decryptedContent");
       final isDataMessage = EncryptionService.isDataMessage(content);
       final messageType = isDataMessage ? MessageType.update : MessageType.userMessage;
+
+      print("contentWithoutHeader : $contentWithoutHeader");
+      print("decryptedContent : $decryptedContent");
+      print("isDataMessage : $isDataMessage");
 
       final message = Message(
           sender: sender,
